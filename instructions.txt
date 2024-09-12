@@ -1,0 +1,28 @@
+On va concevoir un projet de Blog.
+
+
+- Fonctionnalités de base à implémenter : 
+-Création et la gestion de comptes utilisateurs
+-Permettre à un utilisateur de créer, modifier et publier des articles à l'aide d'un éditeur de texte avancé comme easy mde
+-Prévoir un système de catégorie pour classer les articles
+-Permettre à un utilisateur de commenter les articles
+- une gestion des brouillons d'articles pour permettre à plusieurs personnes en même temps à écrire sur le même article.
+-Permettre à un utilisateur de liker les articles
+-Permettre à un utilisateur de partager les articles
+-Permettre à un utilisateur de voir les articles les plus likés
+-Permettre à un utilisateur de voir les articles les plus commentés
+-Permettre à un utilisateur de voir les articles les plus partagés
+-Permettre à un utilisateur de voir les articles les plus vus
+Il faudra implémenter un système pour savoir quel sont les articles les plus populaires du blog en fonction du nombres de visite sur chaque article
+- Pour l'affichage des articles, chaque article devra être accompagné de ses informations (titre, date de publication, nombre de vues, etc...)
+- Chaque article devra être tagué avec les categories en lesquelles il appartient
+- Un système de notifications pour avetir par mails des visiteurs réguliers du blog lorsque un nouvel article est disponible.
+- Permettre de plannifier les articles pour qu'ils soient publiés à un date donnée et heure donnée.
+- Système de notation et d'évaluation des articles pour permettre aux utilisateurs de savoir quels sont les articles les plus appréciés par la communauté.
+
+Je souhaite que tu utilise HTML, CSS, JavaScript, React, ou tout autre technologie que tu trouvera le plus optimale pour ce projet.
+Je souhaite un code qui utilise les bonnes pratiques, et qu'en terme de maintenabilité ce soit optimal, qu'on utilise le GreenCode et que le code, l'architecture des dossiers soit le plus simple et logique.
+Je ne souhaite pas voir de CSS? javaScript dans des fichiers HTML , tu sépare bien le tout, toujours dans un soucis de maintenabilité, et d'optimisation.
+AU fur et à mesure du code , je souhaite que tu me dise de commiter et push le travail, créer des branche supplémentaire si nécessaire entre chaque nouvelle fonctionnalité, et de me donner le commentaire en anglais que je vais écrire à chaque commit.
+
+Et bien sur que l'on avance le projet petit à petit dans les meilleurs conditions possible.
