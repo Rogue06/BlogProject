@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Ici, nous ajouterons la logique pour envoyer les données de connexion
-    console.log('Connexion soumise', { email, password });
+    try {
+      await login(email, password);
+    } catch (error) {
+      console.error('Erreur de connexion', error);
+    }
   };
 
   return (

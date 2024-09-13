@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const SignUpForm: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { signup } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Ici, nous ajouterons la logique pour envoyer les données d'inscription
-    console.log('Inscription soumise', { username, email, password });
+    try {
+      await signup(username, email, password);
+    } catch (error) {
+      console.error('Erreur d\'inscription', error);
+    }
   };
 
   return (
