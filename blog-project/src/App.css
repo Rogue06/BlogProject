@@ -443,3 +443,81 @@ input, textarea, select {
 .no-articles p:last-child {
   color: #6c757d;
 }
+
+.tag-input {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.tag-input input {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag {
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+.tag button {
+  background: none;
+  border: none;
+  color: #666;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.tag.selected {
+  background-color: #3498db;
+  color: white;
+}
+
+.advanced-search {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+}
+
+.advanced-search .tag-input {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.advanced-search .tag-input input {
+  flex-grow: 1;
+  margin-right: 0.5rem;
+}
+
+.advanced-search .tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.advanced-search .tag {
+  background-color: #3498db;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.advanced-search .tag button {
+  background: none;
+  border: none;
+  color: white;
+  margin-left: 0.5rem;
+  cursor: pointer;
+}

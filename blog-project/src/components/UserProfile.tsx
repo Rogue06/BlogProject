@@ -1,40 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Article } from '../context/AuthContext';
 
 const UserProfile: React.FC = () => {
-  const { user, getArticles, updateUserProfile } = useAuth();
-  const [userArticles, setUserArticles] = useState<Article[]>([]);
+  const { user, articles, updateUserProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [editedUsername, setEditedUsername] = useState(user?.username || '');
+  const [userArticles, setUserArticles] = useState<Article[]>([]);
 
   useEffect(() => {
     if (user) {
-      loadUserArticles();
-    }
-  }, [user]);
-
-  const loadUserArticles = async () => {
-    if (user) {
-      const articles = await getArticles(1, 100); // Charger tous les articles de l'utilisateur
       setUserArticles(articles.filter(article => article.author === user.username));
     }
-  };
+  }, [user, articles]);
+
+  const totalLikes = useMemo(() => {
+    return userArticles.reduce((sum, article) => sum + article.likes, 0);
+  }, [userArticles]);
 
   const handleProfileUpdate = async () => {
     if (user) {
       await updateUserProfile({ ...user, username: editedUsername });
       setIsEditing(false);
-      // Recharger les articles après la mise à jour du profil
-      loadUserArticles();
     }
   };
 
   if (!user) {
     return <div>Vous devez être connecté pour voir votre profil.</div>;
   }
-
-  const totalLikes = userArticles.reduce((sum, article) => sum + article.likes, 0);
 
   return (
     <div className="user-profile">

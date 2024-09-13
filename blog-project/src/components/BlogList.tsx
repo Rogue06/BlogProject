@@ -1,20 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, KeyboardEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
 import ShareButtons from './ShareButtons';
-import { Article } from '../context/AuthContext'; // Ajout de cette ligne
+import { Article } from '../context/AuthContext';
 
 const ARTICLES_PER_PAGE = 5;
 
-const categories = ['Tous', 'Technologie', 'Lifestyle', 'Voyage', 'Cuisine', 'Autre']; // Ajout de cette ligne
+const categories = ['Tous', 'Technologie', 'Lifestyle', 'Voyage', 'Cuisine', 'Autre'];
 
 const BlogList: React.FC = () => {
-  const { getArticles, likeArticle, user, totalArticles, onArticleCreated } = useAuth();
+  const { getArticles, likeArticle, user, totalArticles, setTotalArticles, onArticleCreated, articles } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [displayedArticles, setDisplayedArticles] = useState<Article[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('Tous');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchTags, setSearchTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [isAdvancedSearch, setIsAdvancedSearch] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,32 +25,49 @@ const BlogList: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const fetchedArticles = await getArticles(currentPage, ARTICLES_PER_PAGE, selectedCategory, searchTerm);
-      setArticles(fetchedArticles);
+      const result = await getArticles(currentPage, ARTICLES_PER_PAGE, selectedCategory, searchTerm, searchTags);
+      setDisplayedArticles(result.articles);
+      setTotalArticles(result.totalArticles);
     } catch (err) {
       setError('Erreur lors du chargement des articles');
       console.error(err);
     } finally {
       setIsLoading(false);
     }
-  }, [getArticles, currentPage, selectedCategory, searchTerm]);
+  }, [getArticles, currentPage, selectedCategory, searchTerm, searchTags, setTotalArticles]);
 
   useEffect(() => {
     loadArticles();
-  }, [loadArticles, currentPage, selectedCategory, searchTerm, totalArticles]); // Ajout de totalArticles comme dépendance
+  }, [loadArticles, articles, selectedCategory, searchTerm, searchTags]);
 
-  useEffect(() => {
-    const unsubscribe = onArticleCreated(() => {
-      setCurrentPage(1);
-      loadArticles();
-    });
-    return unsubscribe;
-  }, [onArticleCreated, loadArticles]);
+  const handleAddSearchTag = () => {
+    if (tagInput.trim() && !searchTags.includes(tagInput.trim())) {
+      setSearchTags([...searchTags, tagInput.trim()]);
+      setTagInput('');
+    }
+  };
+
+  const handleTagInputKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Empêche le formulaire de se soumettre
+      handleAddSearchTag();
+    }
+  };
+
+  const handleRemoveSearchTag = (tagToRemove: string) => {
+    setSearchTags(searchTags.filter(tag => tag !== tagToRemove));
+  };
 
   const handleLike = async (articleId: string) => {
     try {
-      await likeArticle(articleId);
-      loadArticles();
+      const updatedArticle = await likeArticle(articleId);
+      if (updatedArticle) {
+        setDisplayedArticles(prevArticles => 
+          prevArticles.map(article => 
+            article.id === articleId ? updatedArticle : article
+          )
+        );
+      }
     } catch (error) {
       console.error('Erreur lors du like de l\'article', error);
       alert('Erreur lors du like de l\'article');
@@ -69,7 +89,7 @@ const BlogList: React.FC = () => {
   if (error) return <div>Erreur : {error}</div>;
 
   return (
-    <div>
+    <div className="blog-list">
       <h2>Articles récents</h2>
       <div className="search-container">
         <input
@@ -78,7 +98,32 @@ const BlogList: React.FC = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+        <button onClick={() => setIsAdvancedSearch(!isAdvancedSearch)}>
+          {isAdvancedSearch ? 'Recherche simple' : 'Recherche avancée'}
+        </button>
       </div>
+      {isAdvancedSearch && (
+        <div className="advanced-search">
+          <div className="tag-input">
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyPress={handleTagInputKeyPress}
+              placeholder="Ajouter un tag pour la recherche"
+            />
+            <button type="button" onClick={handleAddSearchTag}>Ajouter</button>
+          </div>
+          <div className="tag-list">
+            {searchTags.map(tag => (
+              <span key={tag} className="tag">
+                {tag}
+                <button type="button" onClick={() => handleRemoveSearchTag(tag)}>&times;</button>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="filter-container">
         <label htmlFor="category-filter">Filtrer par catégorie:</label>
         <select
@@ -91,15 +136,25 @@ const BlogList: React.FC = () => {
           ))}
         </select>
       </div>
-      {articles.length === 0 ? (
-        <p>Aucun article disponible.</p>
+      {displayedArticles.length === 0 ? (
+        <div className="no-articles">
+          <p>Aucun article disponible pour le moment.</p>
+          <p>Soyez le premier à créer un article !</p>
+        </div>
       ) : (
-        articles.map((article) => (
+        displayedArticles.map((article) => (
           <div key={article.id} className="article">
             <h3>{article.title}</h3>
             <p>Catégorie: {article.category}</p>
             <p>Par {article.author} le {new Date(article.createdAt).toLocaleDateString()}</p>
             <p>{article.content}</p>
+            <div className="tags">
+              {article.tags && article.tags.map(tag => (
+                <span key={tag} className="tag">
+                  {tag}
+                </span>
+              ))}
+            </div>
             <p>Likes: {article.likes}</p>
             <button 
               onClick={() => handleLike(article.id)}

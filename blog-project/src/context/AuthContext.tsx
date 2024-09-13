@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
+import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 
 interface User {
   id: string;
@@ -16,6 +16,7 @@ export interface Article {
   comments: Comment[];
   likes: number;  // Ajout du champ likes
   likedBy: string[];  // Ajout du champ likedBy pour stocker les IDs des utilisateurs qui ont liké
+  tags: string[]; // Ajout des tags
 }
 
 export interface Comment {  // Ajout du mot-clé 'export' ici
@@ -30,11 +31,11 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  createArticle: (title: string, content: string, category: string) => Promise<void>;
+  createArticle: (title: string, content: string, category: string, tags: string[]) => Promise<void>;
   addComment: (articleId: string, content: string) => Promise<void>;
-  likeArticle: (articleId: string) => Promise<void>;
+  likeArticle: (articleId: string) => Promise<Article | undefined>;
   articles: Article[];
-  getArticles: (page: number, limit: number, category?: string, searchTerm?: string) => Promise<Article[]>;
+  getArticles: (page: number, limit: number, category?: string, searchTerm?: string, searchTags?: string[]) => Promise<{ articles: Article[]; totalArticles: number }>;
   totalArticles: number;
   setTotalArticles: React.Dispatch<React.SetStateAction<number>>;
   onArticleCreated: (callback: () => void) => () => void; // Modifié ici
@@ -45,9 +46,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<Article[]>(() => {
+    const savedArticles = localStorage.getItem('articles');
+    return savedArticles ? JSON.parse(savedArticles) : [];
+  });
   const [totalArticles, setTotalArticles] = useState(0);
   const [articleCreatedListeners, setArticleCreatedListeners] = useState<(() => void)[]>([]);
+
+  useEffect(() => {
+    localStorage.setItem('articles', JSON.stringify(articles));
+    setTotalArticles(articles.length);
+  }, [articles]);
 
   const login = async (email: string, password: string) => {
     // Ici, nous simulerons une connexion réussie
@@ -65,7 +74,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
   };
 
-  const createArticle = async (title: string, content: string, category: string) => {
+  const createArticle = async (title: string, content: string, category: string, tags: string[] = []) => {
     if (!user) throw new Error("Vous devez être connecté pour créer un article");
     const newArticle: Article = {
       id: Date.now().toString(),
@@ -77,6 +86,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       comments: [],
       likes: 0,  // Initialisation des likes à 0
       likedBy: [],  // Initialisation de likedBy comme un tableau vide
+      tags: tags.map(tag => tag.toLowerCase()), // Convertir tous les tags en minuscules
     };
     setArticles(prevArticles => [...prevArticles, newArticle]);
     setTotalArticles(prev => prev + 1); // Ajout de cette ligne
@@ -85,26 +95,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const likeArticle = async (articleId: string) => {
     if (!user) throw new Error("Vous devez être connecté pour liker un article");
-    setArticles(articles.map(article => {
-      if (article.id === articleId) {
-        if (article.likedBy.includes(user.id)) {
-          // Si l'utilisateur a déjà liké, on retire son like
-          return {
+    let updatedArticle: Article | undefined;
+    setArticles(prevArticles => {
+      const updatedArticles = prevArticles.map(article => {
+        if (article.id === articleId) {
+          const userLiked = article.likedBy.includes(user.id);
+          updatedArticle = {
             ...article,
-            likes: article.likes - 1,
-            likedBy: article.likedBy.filter(id => id !== user.id)
+            likes: userLiked ? article.likes - 1 : article.likes + 1,
+            likedBy: userLiked
+              ? article.likedBy.filter(id => id !== user.id)
+              : [...article.likedBy, user.id]
           };
-        } else {
-          // Sinon, on ajoute son like
-          return {
-            ...article,
-            likes: article.likes + 1,
-            likedBy: [...article.likedBy, user.id]
-          };
+          return updatedArticle;
         }
-      }
-      return article;
-    }));
+        return article;
+      });
+      localStorage.setItem('articles', JSON.stringify(updatedArticles));
+      return updatedArticles;
+    });
+    return updatedArticle;
   };
 
   const addComment = async (articleId: string, content: string) => {
@@ -122,7 +132,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     ));
   };
 
-  const getArticles = useCallback(async (page: number, limit: number, category?: string, searchTerm?: string) => {
+  const getArticles = useCallback(async (page: number, limit: number, category?: string, searchTerm?: string, searchTags?: string[]) => {
     let filteredArticles = articles;
 
     if (category && category !== 'Tous') {
@@ -137,9 +147,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       );
     }
 
+    if (searchTags && searchTags.length > 0) {
+      filteredArticles = filteredArticles.filter(article => 
+        article.tags && searchTags.every(searchTag => 
+          article.tags.some(tag => tag.toLowerCase() === searchTag.toLowerCase())
+        )
+      );
+    }
+
+    // Calculer le nombre total d'articles après filtrage
+    const totalFilteredArticles = filteredArticles.length;
+
+    // Pagination
     const start = (page - 1) * limit;
     const end = start + limit;
-    return filteredArticles.slice(start, end);
+    const paginatedArticles = filteredArticles.slice(start, end);
+
+    return {
+      articles: paginatedArticles,
+      totalArticles: totalFilteredArticles
+    };
   }, [articles]);
 
   const onArticleCreated = useCallback((callback: () => void) => {

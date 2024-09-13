@@ -1,44 +1,47 @@
 import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import './App.css';
+import Header from './components/Header';
 import SignUpForm from './components/SignUpForm';
 import LoginForm from './components/LoginForm';
 import BlogList from './components/BlogList';
 import CreateArticle from './components/CreateArticle';
+import UserProfile from './components/UserProfile';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 function AppContent() {
-  const { user, logout } = useAuth();
-  const [isLogin, setIsLogin] = React.useState(true);
-
-  if (user) {
-    return (
-      <div>
-        <h1>Bienvenue, {user.username}!</h1>
-        <CreateArticle />
-        <BlogList />
-        <button onClick={logout} className="signup">Se déconnecter</button>
-      </div>
-    );
-  }
+  const { user } = useAuth();
 
   return (
     <div className="App">
-      <h1>Mon Blog</h1>
-      {isLogin ? <LoginForm /> : <SignUpForm />}
-      <div className="button-container">
-        <button className={isLogin ? "signup" : "login"} onClick={() => setIsLogin(!isLogin)}>
-          {isLogin ? "S'inscrire" : "Se connecter"}
-        </button>
-      </div>
+      <Header />
+      <main>
+        <Switch>
+          <Route exact path="/">
+            {user ? <BlogList /> : <LoginForm />}
+          </Route>
+          <Route path="/signup">
+            <SignUpForm />
+          </Route>
+          <Route path="/create-article">
+            {user ? <CreateArticle /> : <LoginForm />}
+          </Route>
+          <Route path="/profile">
+            {user ? <UserProfile /> : <LoginForm />}
+          </Route>
+        </Switch>
+      </main>
     </div>
   );
 }
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </Router>
   );
 }
 
