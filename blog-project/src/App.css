@@ -160,16 +160,39 @@ button:disabled {
 
 .header h1 {
   margin: 0;
+  font-size: 1.5rem;
 }
 
 .header nav {
   display: flex;
   align-items: center;
+  gap: 1rem;
+}
+
+.header nav a {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.header nav a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .logout-btn {
-  margin-left: 1rem;
   background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
 }
 
 main {
@@ -367,4 +390,56 @@ input, textarea, select {
   font-size: 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
+}
+
+.user-profile {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.user-profile h2, .user-profile h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.user-profile p {
+  margin-bottom: 0.5rem;
+}
+
+.user-stats, .user-articles {
+  margin-top: 2rem;
+}
+
+.article-preview {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.article-preview h4 {
+  margin: 0 0 0.5rem 0;
+  color: #34495e;
+}
+
+.no-articles {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.no-articles p:first-child {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.no-articles p:last-child {
+  color: #6c757d;
 }

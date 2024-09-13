@@ -38,6 +38,7 @@ interface AuthContextType {
   totalArticles: number;
   setTotalArticles: React.Dispatch<React.SetStateAction<number>>;
   onArticleCreated: (callback: () => void) => () => void; // Modifié ici
+  updateUserProfile: (updatedUser: User) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -148,6 +149,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, []);
 
+  const updateUserProfile = async (updatedUser: User) => {
+    // Dans une vraie application, vous feriez un appel API ici
+    setUser(updatedUser);
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -161,7 +167,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       getArticles, 
       totalArticles, 
       setTotalArticles, 
-      onArticleCreated
+      onArticleCreated,
+      updateUserProfile
     }}>
       {children}
     </AuthContext.Provider>
