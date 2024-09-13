@@ -1,40 +1,60 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import CommentForm from './CommentForm';
+import CommentList from './CommentList';
+import ShareButtons from './ShareButtons';
 
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  author: string;
-  createdAt: Date;
-}
+const categories = ['Tous', 'Technologie', 'Lifestyle', 'Voyage', 'Cuisine', 'Autre'];
 
 const BlogList: React.FC = () => {
-  // Pour l'instant, nous utiliserons des données factices
-  const blogPosts: BlogPost[] = [
-    {
-      id: '1',
-      title: 'Premier article',
-      content: 'Contenu du premier article...',
-      author: 'John Doe',
-      createdAt: new Date(),
-    },
-    {
-      id: '2',
-      title: 'Deuxième article',
-      content: 'Contenu du deuxième article...',
-      author: 'Jane Doe',
-      createdAt: new Date(),
-    },
-  ];
+  const { articles, likeArticle, user } = useAuth();
+  const [selectedCategory, setSelectedCategory] = useState('Tous');
+
+  const filteredArticles = selectedCategory === 'Tous'
+    ? articles
+    : articles.filter(article => article.category === selectedCategory);
+
+  const handleLike = async (articleId: string) => {
+    try {
+      await likeArticle(articleId);
+    } catch (error) {
+      console.error('Erreur lors du like de l\'article', error);
+      alert('Erreur lors du like de l\'article');
+    }
+  };
 
   return (
     <div>
       <h2>Articles récents</h2>
-      {blogPosts.map((post) => (
-        <div key={post.id}>
-          <h3>{post.title}</h3>
-          <p>Par {post.author} le {post.createdAt.toLocaleDateString()}</p>
-          <p>{post.content.substring(0, 100)}...</p>
+      <div>
+        <label htmlFor="category-filter">Filtrer par catégorie:</label>
+        <select
+          id="category-filter"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      </div>
+      {filteredArticles.map((article) => (
+        <div key={article.id} className="article">
+          <h3>{article.title}</h3>
+          <p>Catégorie: {article.category}</p>
+          <p>Par {article.author} le {article.createdAt.toLocaleDateString()}</p>
+          <p>{article.content}</p>
+          <p>Likes: {article.likes}</p>
+          <button 
+            onClick={() => handleLike(article.id)}
+            disabled={!user}
+            className={user && article.likedBy.includes(user.id) ? 'liked' : ''}
+          >
+            {user && article.likedBy.includes(user.id) ? 'Unlike' : 'Like'}
+          </button>
+          <ShareButtons title={article.title} url={`${window.location.origin}/article/${article.id}`} />
+          <CommentList comments={article.comments} />
+          <CommentForm articleId={article.id} />
         </div>
       ))}
     </div>
