@@ -25,6 +25,8 @@ const UserProfile: React.FC = () => {
     if (user) {
       await updateUserProfile({ ...user, username: editedUsername });
       setIsEditing(false);
+      // Recharger les articles après la mise à jour du profil
+      loadUserArticles();
     }
   };
 

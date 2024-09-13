@@ -150,8 +150,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const updateUserProfile = async (updatedUser: User) => {
-    // Dans une vraie application, vous feriez un appel API ici
+    if (!user) return;
+    
+    // Mettre à jour l'utilisateur
     setUser(updatedUser);
+
+    // Mettre à jour les articles de l'utilisateur
+    setArticles(prevArticles => prevArticles.map(article => {
+      if (article.author === user.username) {
+        return { ...article, author: updatedUser.username };
+      }
+      return article;
+    }));
+
+    // Mettre à jour les commentaires de l'utilisateur
+    setArticles(prevArticles => prevArticles.map(article => ({
+      ...article,
+      comments: article.comments.map(comment => {
+        if (comment.author === user.username) {
+          return { ...comment, author: updatedUser.username };
+        }
+        return comment;
+      })
+    })));
   };
 
   return (
