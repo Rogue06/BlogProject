@@ -34,7 +34,7 @@ interface AuthContextType {
   addComment: (articleId: string, content: string) => Promise<void>;
   likeArticle: (articleId: string) => Promise<void>;
   articles: Article[];
-  getArticles: (page: number, limit: number) => Promise<Article[]>;
+  getArticles: (page: number, limit: number, category?: string, searchTerm?: string) => Promise<Article[]>;
   totalArticles: number;
   setTotalArticles: React.Dispatch<React.SetStateAction<number>>;
   onArticleCreated: (callback: () => void) => () => void; // Modifié ici
@@ -121,10 +121,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     ));
   };
 
-  const getArticles = useCallback(async (page: number, limit: number) => {
+  const getArticles = useCallback(async (page: number, limit: number, category?: string, searchTerm?: string) => {
+    let filteredArticles = articles;
+
+    if (category && category !== 'Tous') {
+      filteredArticles = filteredArticles.filter(article => article.category === category);
+    }
+
+    if (searchTerm) {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      filteredArticles = filteredArticles.filter(article => 
+        article.title.toLowerCase().includes(lowerSearchTerm) ||
+        article.content.toLowerCase().includes(lowerSearchTerm)
+      );
+    }
+
     const start = (page - 1) * limit;
     const end = start + limit;
-    return articles.slice(start, end);
+    return filteredArticles.slice(start, end);
   }, [articles]);
 
   const onArticleCreated = useCallback((callback: () => void) => {

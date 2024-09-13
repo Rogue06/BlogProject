@@ -14,6 +14,7 @@ const BlogList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [articles, setArticles] = useState<Article[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('Tous');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,22 +22,19 @@ const BlogList: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const fetchedArticles = await getArticles(currentPage, ARTICLES_PER_PAGE);
-      const filteredArticles = selectedCategory === 'Tous'
-        ? fetchedArticles
-        : fetchedArticles.filter(article => article.category === selectedCategory);
-      setArticles(filteredArticles);
+      const fetchedArticles = await getArticles(currentPage, ARTICLES_PER_PAGE, selectedCategory, searchTerm);
+      setArticles(fetchedArticles);
     } catch (err) {
       setError('Erreur lors du chargement des articles');
       console.error(err);
     } finally {
       setIsLoading(false);
     }
-  }, [getArticles, currentPage, selectedCategory]);
+  }, [getArticles, currentPage, selectedCategory, searchTerm]);
 
   useEffect(() => {
     loadArticles();
-  }, [loadArticles, currentPage, selectedCategory, totalArticles]); // Ajout de totalArticles comme dépendance
+  }, [loadArticles, currentPage, selectedCategory, searchTerm, totalArticles]); // Ajout de totalArticles comme dépendance
 
   useEffect(() => {
     const unsubscribe = onArticleCreated(() => {
@@ -73,7 +71,15 @@ const BlogList: React.FC = () => {
   return (
     <div>
       <h2>Articles récents</h2>
-      <div>
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Rechercher des articles..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+      <div className="filter-container">
         <label htmlFor="category-filter">Filtrer par catégorie:</label>
         <select
           id="category-filter"
