@@ -1,16 +1,21 @@
 import React, { useState, useEffect, useCallback, KeyboardEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import CommentForm from './CommentForm';
 import CommentList from './CommentList';
 import ShareButtons from './ShareButtons';
 import { Article } from '../context/AuthContext';
+import CreateArticle from './CreateArticle';
+import { FaTrash, FaEdit } from 'react-icons/fa';
+import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 
 const ARTICLES_PER_PAGE = 5;
 
 const categories = ['Tous', 'Technologie', 'Lifestyle', 'Voyage', 'Cuisine', 'Autre'];
 
 const BlogList: React.FC = () => {
-  const { getArticles, likeArticle, user, totalArticles, setTotalArticles, onArticleCreated, articles } = useAuth();
+  const { getArticles, likeArticle, user, totalArticles, setTotalArticles, onArticleCreated, articles, deleteArticle } = useAuth();
+  const { theme } = useTheme();
   const [currentPage, setCurrentPage] = useState(1);
   const [displayedArticles, setDisplayedArticles] = useState<Article[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('Tous');
@@ -20,6 +25,7 @@ const BlogList: React.FC = () => {
   const [isAdvancedSearch, setIsAdvancedSearch] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
   const loadArticles = useCallback(async () => {
     setIsLoading(true);
@@ -88,9 +94,23 @@ const BlogList: React.FC = () => {
   if (isLoading) return <div>Chargement des articles...</div>;
   if (error) return <div>Erreur : {error}</div>;
 
+  const handleEditClick = (article: Article) => {
+    setEditingArticle(article);
+  };
+
+  const handleEditCancel = () => {
+    setEditingArticle(null);
+  };
+
+  const handleDeleteArticle = (articleId: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.')) {
+      deleteArticle(articleId);
+    }
+  };
+
   return (
-    <div className="blog-list">
-      <h2>Articles récents</h2>
+    <div className={`blog-list ${theme}`}>
+      <h1>Blog</h1>
       <div className="search-container">
         <input
           type="text"
@@ -136,35 +156,60 @@ const BlogList: React.FC = () => {
           ))}
         </select>
       </div>
-      {displayedArticles.length === 0 ? (
-        <div className="no-articles">
-          <p>Aucun article disponible pour le moment.</p>
-          <p>Soyez le premier à créer un article !</p>
-        </div>
+      <h2>Articles récents</h2>
+      {editingArticle ? (
+        <CreateArticle 
+          articleToEdit={editingArticle} 
+          onEditCancel={() => setEditingArticle(null)}
+        />
       ) : (
         displayedArticles.map((article) => (
           <div key={article.id} className="article">
             <h3>{article.title}</h3>
             <p>Catégorie: {article.category}</p>
             <p>Par {article.author} le {new Date(article.createdAt).toLocaleDateString()}</p>
-            <p>{article.content}</p>
-            <div className="tags">
-              {article.tags && article.tags.map(tag => (
-                <span key={tag} className="tag">
-                  {tag}
-                </span>
-              ))}
+            <div className="article-content">
+              <div dangerouslySetInnerHTML={{ __html: article.content }} />
+              <div className="article-actions">
+                <ShareButtons title={article.title} url={`${window.location.origin}/article/${article.id}`} />
+                {user && user.username === article.author && (
+                  <>
+                    <span title="Modifier l'article">
+                      <FaEdit 
+                        className="edit-icon" 
+                        onClick={() => handleEditClick(article)}
+                      />
+                    </span>
+                    <span title="Supprimer l'article">
+                      <FaTrash 
+                        className="delete-icon" 
+                        onClick={() => handleDeleteArticle(article.id)}
+                      />
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
-            <p>Likes: {article.likes}</p>
-            <button 
-              onClick={() => handleLike(article.id)}
-              disabled={!user}
-              className={user && article.likedBy.includes(user.id) ? 'liked' : ''}
-            >
-              {user && article.likedBy.includes(user.id) ? 'Unlike' : 'Like'}
-            </button>
-            <ShareButtons title={article.title} url={`${window.location.origin}/article/${article.id}`} />
-            <CommentList comments={article.comments} />
+            <div className="article-footer">
+              <div className="tags">
+                {article.tags && article.tags.map(tag => (
+                  <span key={tag} className="tag">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className="like-container">
+                <button 
+                  onClick={() => handleLike(article.id)}
+                  disabled={!user}
+                  className="like-button"
+                >
+                  {article.likes > 0 ? <AiFillHeart color="red" /> : <AiOutlineHeart color="red" />}
+                  <span className="like-count">{article.likes}</span>
+                </button>
+              </div>
+            </div>
+            <CommentList comments={article.comments} articleId={article.id} />
             <CommentForm articleId={article.id} />
           </div>
         ))

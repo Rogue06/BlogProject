@@ -17,13 +17,16 @@ export interface Article {
   likes: number;  // Ajout du champ likes
   likedBy: string[];  // Ajout du champ likedBy pour stocker les IDs des utilisateurs qui ont liké
   tags: string[]; // Ajout des tags
+  image?: string;
+  video?: string;
 }
 
-export interface Comment {  // Ajout du mot-clé 'export' ici
+export interface Comment {
   id: string;
   content: string;
   author: string;
-  createdAt: Date;
+  createdAt: Date | string;
+  parentId?: string; // Ajoutez cette ligne
 }
 
 interface AuthContextType {
@@ -31,8 +34,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  createArticle: (title: string, content: string, category: string, tags: string[]) => Promise<void>;
-  addComment: (articleId: string, content: string) => Promise<void>;
+  createArticle: (title: string, content: string, category: string, tags: string[], image?: File | null, video?: File | null) => Promise<void>;
+  addComment: (articleId: string, content: string, parentCommentId?: string) => Promise<void>;
   likeArticle: (articleId: string) => Promise<Article | undefined>;
   articles: Article[];
   getArticles: (page: number, limit: number, category?: string, searchTerm?: string, searchTags?: string[]) => Promise<{ articles: Article[]; totalArticles: number }>;
@@ -40,6 +43,14 @@ interface AuthContextType {
   setTotalArticles: React.Dispatch<React.SetStateAction<number>>;
   onArticleCreated: (callback: () => void) => () => void; // Modifié ici
   updateUserProfile: (updatedUser: User) => Promise<void>;
+  updateArticle: (articleId: string, updatedArticle: Partial<Article>) => Promise<void>;
+  updateComment: (articleId: string, commentId: string, newContent: string) => Promise<void>;
+  deleteArticle: (articleId: string) => Promise<void>;
+  deleteComment: (articleId: string, commentId: string) => Promise<void>;
+  totalNewComments: number;
+  hasNewNotifications: boolean;
+  clearNotifications: () => void;
+  lastNotificationCheckTime: number;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,6 +63,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
   const [totalArticles, setTotalArticles] = useState(0);
   const [articleCreatedListeners, setArticleCreatedListeners] = useState<(() => void)[]>([]);
+  const [totalNewComments, setTotalNewComments] = useState(0);
+  const [hasNewNotifications, setHasNewNotifications] = useState(false);
+  const [lastNotificationCheckTime, setLastNotificationCheckTime] = useState(Date.now());
 
   useEffect(() => {
     localStorage.setItem('articles', JSON.stringify(articles));
@@ -74,8 +88,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
   };
 
-  const createArticle = async (title: string, content: string, category: string, tags: string[] = []) => {
+  const createArticle = async (title: string, content: string, category: string, tags: string[] = [], image?: File | null, video?: File | null) => {
     if (!user) throw new Error("Vous devez être connecté pour créer un article");
+    
+    // Ici, vous devriez implémenter la logique pour uploader l'image et la vidéo
+    // et obtenir leurs URLs. Pour cet exemple, nous allons simplement utiliser des URLs factices.
+    const imageUrl = image ? 'http://example.com/image.jpg' : undefined;
+    const videoUrl = video ? 'http://example.com/video.mp4' : undefined;
+
     const newArticle: Article = {
       id: Date.now().toString(),
       title,
@@ -84,12 +104,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       category,
       createdAt: new Date(),
       comments: [],
-      likes: 0,  // Initialisation des likes à 0
-      likedBy: [],  // Initialisation de likedBy comme un tableau vide
-      tags: tags.map(tag => tag.toLowerCase()), // Convertir tous les tags en minuscules
+      likes: 0,
+      likedBy: [],
+      tags: tags.map(tag => tag.toLowerCase()),
+      image: imageUrl,
+      video: videoUrl,
     };
     setArticles(prevArticles => [...prevArticles, newArticle]);
-    setTotalArticles(prev => prev + 1); // Ajout de cette ligne
+    setTotalArticles(prev => prev + 1);
     articleCreatedListeners.forEach(listener => listener());
   };
 
@@ -107,6 +129,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
               ? article.likedBy.filter(id => id !== user.id)
               : [...article.likedBy, user.id]
           };
+          
+          // Vérifier si l'article appartient à l'utilisateur connecté et si c'est un nouveau like
+          if (article.author === user.username && !userLiked) {
+            setHasNewNotifications(true);
+          }
+          
           return updatedArticle;
         }
         return article;
@@ -117,19 +145,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return updatedArticle;
   };
 
-  const addComment = async (articleId: string, content: string) => {
+  const addComment = async (articleId: string, content: string, parentCommentId?: string) => {
     if (!user) throw new Error("Vous devez être connecté pour commenter");
     const newComment: Comment = {
       id: Date.now().toString(),
       content,
       author: user.username,
       createdAt: new Date(),
+      parentId: parentCommentId,
     };
-    setArticles(articles.map(article => 
+    setArticles(prevArticles => prevArticles.map(article => 
       article.id === articleId 
         ? { ...article, comments: [...article.comments, newComment] }
         : article
     ));
+    
+    // Vérifier si le commentaire est sur un article de l'utilisateur connecté
+    const article = articles.find(a => a.id === articleId);
+    if (article && article.author === user.username) {
+      setHasNewNotifications(true);
+    }
   };
 
   const getArticles = useCallback(async (page: number, limit: number, category?: string, searchTerm?: string, searchTags?: string[]) => {
@@ -202,6 +237,68 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     })));
   };
 
+  const updateArticle = async (articleId: string, updatedArticle: Partial<Article>) => {
+    if (!user) throw new Error("Vous devez être connecté pour modifier un article");
+    setArticles(prevArticles => prevArticles.map(article => 
+      article.id === articleId ? { ...article, ...updatedArticle } : article
+    ));
+  };
+
+  const updateComment = async (articleId: string, commentId: string, newContent: string) => {
+    if (!user) throw new Error("Vous devez être connecté pour modifier un commentaire");
+    setArticles(prevArticles => prevArticles.map(article => 
+      article.id === articleId
+        ? {
+            ...article,
+            comments: article.comments.map(comment =>
+              comment.id === commentId
+                ? { ...comment, content: newContent }
+                : comment
+            )
+          }
+        : article
+    ));
+  };
+
+  const deleteArticle = async (articleId: string) => {
+    if (!user) throw new Error("Vous devez être connecté pour supprimer un article");
+    setArticles(prevArticles => prevArticles.filter(article => article.id !== articleId));
+  };
+
+  const deleteComment = async (articleId: string, commentId: string) => {
+    if (!user) throw new Error("Vous devez être connecté pour supprimer un commentaire");
+    setArticles(prevArticles => prevArticles.map(article => 
+      article.id === articleId
+        ? { ...article, comments: article.comments.filter(comment => comment.id !== commentId) }
+        : article
+    ));
+  };
+
+  // Ajoutez une fonction pour mettre à jour totalNewComments
+  const updateTotalNewComments = useCallback(() => {
+    const newComments = articles.reduce((sum, article) => {
+      // Ici, vous devriez implémenter une logique pour déterminer quels commentaires sont "nouveaux"
+      // Par exemple, en comparant leur date de création avec la dernière visite de l'utilisateur
+      const newCommentsCount = article.comments.filter(comment => {
+        // Exemple : considérer comme nouveau tout commentaire créé dans les dernières 24 heures
+        const commentDate = new Date(comment.createdAt);
+        const now = new Date();
+        return now.getTime() - commentDate.getTime() < 24 * 60 * 60 * 1000;
+      }).length;
+      return sum + newCommentsCount;
+    }, 0);
+    setTotalNewComments(newComments);
+  }, [articles]);
+
+  useEffect(() => {
+    updateTotalNewComments();
+  }, [updateTotalNewComments]);
+
+  const clearNotifications = () => {
+    setHasNewNotifications(false);
+    setLastNotificationCheckTime(Date.now());
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -216,7 +313,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       totalArticles, 
       setTotalArticles, 
       onArticleCreated,
-      updateUserProfile
+      updateUserProfile,
+      updateArticle,
+      updateComment,
+      deleteArticle,
+      deleteComment,
+      totalNewComments,
+      hasNewNotifications,
+      clearNotifications,
+      lastNotificationCheckTime
     }}>
       {children}
     </AuthContext.Provider>

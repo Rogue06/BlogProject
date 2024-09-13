@@ -28,35 +28,74 @@ input, textarea {
 }
 
 button {
-  padding: 10px 20px;
+  background: none;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-button.login {
-  background-color: #3498db;
-  color: white;
-}
-
-button.signup {
-  background-color: #2ecc71;
-  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+  padding: 0.5em 1em;
+  color: inherit;
+  transition: transform 0.3s ease, color 0.3s ease, background-color 0.3s ease;
 }
 
 button:hover {
-  opacity: 0.8;
+  transform: scale(1.05);
 }
 
-button.liked {
-  background-color: #e74c3c;
+button:active {
+  transform: scale(0.95);
 }
 
 button:disabled {
-  opacity: 0.5;
   cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Styles spécifiques pour certains boutons */
+.login-btn, .signup-btn, .logout-btn, .submit-btn {
+  background-color: #3498db;
+  color: white;
+  border-radius: 4px;
+}
+
+.login-btn:hover, .signup-btn:hover, .logout-btn:hover, .submit-btn:hover {
+  background-color: #2980b9;
+}
+
+.like-button {
+  font-size: 1.2em;
+  padding: 0;
+  color: red;
+}
+
+.like-button:hover svg {
+  transform: scale(1.2) rotate(-10deg);
+}
+
+.like-button .like-count {
+  margin-left: 5px;
+  font-size: 0.8em;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.like-button:hover .like-count {
+  color: red;
+}
+
+.edit-icon, .delete-icon {
+  font-size: 1.2em;
+  margin-left: 10px;
+}
+
+.edit-icon {
+  color: #3498db;
+}
+
+.delete-icon {
+  color: #e74c3c;
 }
 
 .button-container {
@@ -85,10 +124,31 @@ button:disabled {
   border-radius: 4px;
   padding: 10px;
   margin-top: 10px;
+  position: relative;
 }
 
 .comment p {
   margin: 5px 0;
+}
+
+.comment button {
+  margin-top: 5px;
+  padding: 5px 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.comment button:hover {
+  background-color: #2980b9;
+}
+
+.comment textarea {
+  width: 100%;
+  min-height: 60px;
+  margin-bottom: 10px;
 }
 
 .share-buttons {
@@ -161,6 +221,7 @@ button:disabled {
 .header h1 {
   margin: 0;
   font-size: 1.5rem;
+  color : #ffffff;
 }
 
 .header nav {
@@ -214,47 +275,38 @@ main {
 }
 
 .create-article-form {
-  background-color: white;
-  padding: 2rem;
+  background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  padding: 2rem;
   max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 2rem auto;
 }
 
 .create-article-form h2 {
+  font-size: 2rem;
+  color: #333;
   margin-bottom: 1.5rem;
-  color: #2c3e50;
   text-align: center;
 }
 
-.form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
 .form-group {
-  flex: 1 1 250px; /* Ajusté pour une meilleure flexibilité */
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
+  display: block;
   margin-bottom: 0.5rem;
-  font-weight: bold;
-  color: #34495e;
+  font-weight: 600;
+  color: #555;
 }
 
 .form-group input,
 .form-group select,
-.form-group textarea {
+.form-group .ql-container {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #bdc3c7;
+  border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
@@ -262,18 +314,24 @@ main {
 
 .form-group input:focus,
 .form-group select:focus,
-.form-group textarea:focus {
+.form-group .ql-container:focus {
   outline: none;
   border-color: #3498db;
 }
 
-.form-group textarea {
-  min-height: 150px;
-  resize: vertical;
+.ql-toolbar {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.ql-container {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  min-height: 200px;
 }
 
 .submit-btn {
-  background-color: #2ecc71;
+  background-color: #3498db;
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
@@ -282,13 +340,13 @@ main {
   cursor: pointer;
   transition: background-color 0.3s ease;
   display: block;
-  margin: 1rem auto 0;
-  width: 100%; /* Ajouté pour une largeur complète sur mobile */
-  max-width: 300px; /* Limite la largeur sur les grands écrans */
+  width: 100%;
+  max-width: 200px;
+  margin: 2rem auto 0;
 }
 
 .submit-btn:hover {
-  background-color: #27ae60;
+  background-color: #2980b9;
 }
 
 .filter-container {
@@ -520,4 +578,972 @@ input, textarea, select {
   color: white;
   margin-left: 0.5rem;
   cursor: pointer;
+}
+
+.App.light {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.App.dark {
+  background-color: #1a202c;
+  color: #e2e8f0;
+}
+
+.App.dark h1, .App.dark h2, .App.dark h3 {
+  color: #f7fafc;
+}
+
+.App.dark .header {
+  background-color: #2d3748;
+}
+
+.App.dark .article {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+.App.dark .comment {
+  background-color: #3a4a5e;
+  border-color: #4a5568;
+}
+
+.App.dark input, .App.dark textarea, .App.dark select {
+  background-color: #4a5568;
+  color: #e2e8f0;
+  border-color: #718096;
+}
+
+/* Supprimez ou commentez ces lignes pour conserver les couleurs des boutons */
+/*
+.App.dark button {
+  background-color: #4a5568;
+  color: #e2e8f0;
+}
+
+.App.dark button:hover {
+  background-color: #718096;
+}
+*/
+
+.App.dark .create-article-form, .App.dark .auth-container, .App.dark .user-profile {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+.App.dark .article-preview {
+  background-color: #3a4a5e;
+}
+
+.App.dark .tag {
+  background-color: #4a5568;
+  color: #e2e8f0;
+}
+
+.App.dark .advanced-search {
+  background-color: #2d3748;
+}
+
+.App.dark .pagination button {
+  background-color: #3498db; /* Utilisez la même couleur que le mode clair */
+  color: #e2e8f0;
+}
+
+.App.dark .pagination button:disabled {
+  background-color: #2d3748;
+  opacity: 0.5;
+}
+
+.App.dark .no-articles {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+.App.dark .theme-toggle {
+  color: #e2e8f0;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.App {
+  text-align: center;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+h1, h2 {
+  color: #2c3e50;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+input, textarea {
+  width: 100%;
+  max-width: 300px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+  padding: 0.5em 1em;
+  color: inherit;
+  transition: transform 0.3s ease, color 0.3s ease, background-color 0.3s ease;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Styles spécifiques pour certains boutons */
+.login-btn, .signup-btn, .logout-btn, .submit-btn {
+  background-color: #3498db;
+  color: white;
+  border-radius: 4px;
+}
+
+.login-btn:hover, .signup-btn:hover, .logout-btn:hover, .submit-btn:hover {
+  background-color: #2980b9;
+}
+
+.like-button {
+  font-size: 1.2em;
+  padding: 0;
+  color: red;
+}
+
+.like-button:hover svg {
+  transform: scale(1.2) rotate(-10deg);
+}
+
+.like-button .like-count {
+  margin-left: 5px;
+  font-size: 0.8em;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.like-button:hover .like-count {
+  color: red;
+}
+
+.edit-icon, .delete-icon {
+  font-size: 1.2em;
+  margin-left: 10px;
+}
+
+.edit-icon {
+  color: #3498db;
+}
+
+.delete-icon {
+  color: #e74c3c;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.article {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.article h3 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.comment {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 10px;
+  position: relative;
+}
+
+.comment button {
+  margin-top: 5px;
+  padding: 5px 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.comment button:hover {
+  background-color: #2980b9;
+}
+
+.comment textarea {
+  width: 100%;
+  min-height: 60px;
+  margin-bottom: 10px;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.share-buttons a, .share-buttons button {
+  padding: 5px 10px;
+  text-decoration: none;
+  color: white;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.share-buttons button {
+  background-color: #4CAF50;
+  border: none;
+  cursor: pointer;
+}
+
+.share-buttons a:nth-child(2) {
+  background-color: #3b5998;
+}
+
+.share-buttons a:nth-child(3) {
+  background-color: #1DA1F2;
+}
+
+.share-buttons a:nth-child(4) {
+  background-color: #0077B5;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  margin: 0 10px;
+  padding: 5px 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  margin: 0 10px;
+}
+
+.header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color : #ffffff;
+}
+
+.header nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header nav a {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.header nav a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+main {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.auth-container {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.switch-auth-btn {
+  margin-top: 1rem;
+  background-color: #3498db;
+}
+
+.create-article-form {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.create-article-form h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.form-group input,
+.form-group select,
+.form-group .ql-container {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group .ql-container:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.ql-toolbar {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.ql-container {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  min-height: 200px;
+}
+
+.submit-btn {
+  background-color: #3498db;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  margin: 2rem auto 0;
+}
+
+.submit-btn:hover {
+  background-color: #2980b9;
+}
+
+.filter-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.filter-container label {
+  margin-right: 1rem;
+  font-weight: bold;
+}
+
+.filter-container select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  width: auto;
+}
+
+.article-list {
+  display: grid;
+  gap: 2rem;
+}
+
+.article {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.article-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.article-meta {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+button, input[type="submit"] {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover, input[type="submit"]:hover {
+  opacity: 0.9;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.pagination {
+  margin-top: 2rem;
+}
+
+.pagination button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  margin: 0 0.25rem;
+  border-radius: 4px;
+}
+
+.pagination button:disabled {
+  background-color: #bdc3c7;
+}
+
+/* Ajout de media queries pour une meilleure responsivité */
+@media (max-width: 600px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-group {
+    flex-basis: 100%;
+  }
+}
+
+.search-container {
+  margin-bottom: 1rem;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.user-profile {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.user-profile h2, .user-profile h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.user-profile p {
+  margin-bottom: 0.5rem;
+}
+
+.user-stats, .user-articles {
+  margin-top: 2rem;
+}
+
+.article-preview {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.article-preview h4 {
+  margin: 0 0 0.5rem 0;
+  color: #34495e;
+}
+
+.no-articles {
+  text-align: center;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.no-articles p:first-child {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.no-articles p:last-child {
+  color: #6c757d;
+}
+
+.tag-input {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.tag-input input {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag {
+  background-color: #e0e0e0;
+  padding: 5px 10px;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.9em;
+}
+
+.tag button {
+  background: none;
+  border: none;
+  color: #666;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+.tag.selected {
+  background-color: #3498db;
+  color: white;
+}
+
+.advanced-search {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+}
+
+.advanced-search .tag-input {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.advanced-search .tag-input input {
+  flex-grow: 1;
+  margin-right: 0.5rem;
+}
+
+.advanced-search .tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.advanced-search .tag {
+  background-color: #3498db;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.advanced-search .tag button {
+  background: none;
+  border: none;
+  color: white;
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
+
+.App.light {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.App.dark {
+  background-color: #1a202c;
+  color: #e2e8f0;
+}
+
+.App.dark h1, .App.dark h2, .App.dark h3 {
+  color: #f7fafc;
+}
+
+.App.dark .header {
+  background-color: #2d3748;
+}
+
+.App.dark .article {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+.App.dark .comment {
+  background-color: #3a4a5e;
+  border-color: #4a5568;
+}
+
+.App.dark input, .App.dark textarea, .App.dark select {
+  background-color: #4a5568;
+  color: #e2e8f0;
+  border-color: #718096;
+}
+
+/* Supprimez ou commentez ces lignes pour conserver les couleurs des boutons */
+/*
+.App.dark button {
+  background-color: #4a5568;
+  color: #e2e8f0;
+}
+
+.App.dark button:hover {
+  background-color: #718096;
+}
+*/
+
+.App.dark .create-article-form, .App.dark .auth-container, .App.dark .user-profile {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+.App.dark .article-preview {
+  background-color: #3a4a5e;
+}
+
+.App.dark .tag {
+  background-color: #4a5568;
+  color: #e2e8f0;
+}
+
+.App.dark .advanced-search {
+  background-color: #2d3748;
+}
+
+.App.dark .pagination button {
+  background-color: #3498db; /* Utilisez la même couleur que le mode clair */
+  color: #e2e8f0;
+}
+
+.App.dark .pagination button:disabled {
+  background-color: #2d3748;
+  opacity: 0.5;
+}
+
+.App.dark .no-articles {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+.App.dark .theme-toggle {
+  color: #e2e8f0;
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.ql-container {
+  min-height: 200px;
+}
+
+.ql-editor {
+  font-size: 16px;
+}
+
+.edit-icon, .delete-icon {
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 1.2em;
+}
+
+.edit-icon {
+  color: #3498db;
+}
+
+.delete-icon {
+  color: #e74c3c;
+}
+
+.edit-icon:hover, .delete-icon:hover {
+  opacity: 0.7;
+}
+
+.article-actions, .comment-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.article-actions span, .comment-actions span {
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.article-footer {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.article-footer .tags {
+  flex-grow: 1;
+  margin-right: 1rem;
+}
+
+.article-footer p {
+  margin: 0 1rem 0 0;
+}
+
+.article-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.article-content {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.article-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.article-actions .share-buttons {
+  margin-right: auto;
+}
+
+.article-actions .edit-icon,
+.article-actions .delete-icon {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.article-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.article-footer .tags {
+  flex-grow: 1;
+}
+
+.article-footer p {
+  margin: 0 1rem;
+}
+
+.like-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 1.2em;
+  padding: 0;
+  color: red;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.like-button:hover {
+  transform: scale(1.1);
+}
+
+.like-button:active {
+  transform: scale(0.9);
+}
+
+.like-button svg {
+  transition: transform 0.3s ease;
+}
+
+.like-button:hover svg {
+  transform: scale(1.2) rotate(-10deg);
+}
+
+.like-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.like-button .like-count {
+  margin-left: 5px;
+  font-size: 0.8em;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.like-button:hover .like-count {
+  color: red;
+}
+
+.profile-link {
+  position: relative;
+}
+
+.notification-dot {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+}
+
+.article-preview.new-activity {
+  border-left: 4px solid #e74c3c;
+  padding-left: 10px;
+}
+
+.new-activity-indicator {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.article-preview.new-activity {
+  border: 2px solid #e74c3c;
+  background-color: #fdf2f0;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+.new-activity-details {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+
+.new-likes {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.new-comments p {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.new-comments ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.new-comments li {
+  background-color: #f8f8f8;
+  padding: 5px;
+  margin-bottom: 5px;
+  border-radius: 3px;
 }

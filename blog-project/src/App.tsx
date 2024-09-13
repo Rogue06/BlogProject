@@ -8,12 +8,14 @@ import BlogList from './components/BlogList';
 import CreateArticle from './components/CreateArticle';
 import UserProfile from './components/UserProfile';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 function AppContent() {
   const { user } = useAuth();
+  const { theme } = useTheme();
 
   return (
-    <div className="App">
+    <div className={`App ${theme}`}>
       <Header />
       <main>
         <Switch>
@@ -39,7 +41,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppContent />
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
       </AuthProvider>
     </Router>
   );
